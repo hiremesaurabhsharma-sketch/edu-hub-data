@@ -2,9 +2,13 @@ import os
 import yt_dlp
 from supabase import create_client, Client
 
-# 1. GitHub Secrets से Supabase का कनेक्शन
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
+# सीक्रेट्स को चेक करें कि वे खाली तो नहीं हैं
+url = os.environ.get("SUPABASE_URL")
+key = os.environ.get("SUPABASE_KEY")
+
+if not url or not key:
+    raise ValueError("SUPABASE_URL or SUPABASE_KEY not found in environment variables!")
+
 supabase: Client = create_client(url, key)
 
 # 2. अपने टीचर्स/चैनल्स के लिंक यहाँ डालें
