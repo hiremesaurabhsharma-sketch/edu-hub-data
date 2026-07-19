@@ -1,3 +1,4 @@
+import os
 import yt_dlp
 from supabase import create_client, Client
 
@@ -120,20 +121,28 @@ CHANNEL_URLS = [
 def fetch_and_update():
     ydl_opts = {
         'extract_flat': True,
-        'playlist_items': '1-10', # हर चैनल की ताज़ा 10 वीडियोस लाएगा 
+        'playlist_items': '1-50', # 50 वीडियोस कर दिया गया है
         'quiet': True
     }
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         for channel_url in CHANNEL_URLS:
+            # Shorts को हटाने के लिए '/videos' टैब का इस्तेमाल
+            video_tab_url = channel_url + "/videos"
             try:
-                print(f"Fetching data for: {channel_url}")
-                info = ydl.extract_info(channel_url, download=False)
+                print(f"Fetching data for: {video_tab_url}")
+                info = ydl.extract_info(video_tab_url, download=False)
                 channel_name = info.get('title', 'Unknown Channel')
                 
                 entries = info.get('entries', [])
                 for entry in entries:
                     video_id = entry.get('id')
+                    
+                    # --- नया फ़िल्टर: चैनल ID (UC...) और गलत ID को ब्लॉक करना ---
+                    if not video_id or video_id.startswith('UC') or len(video_id) != 11:
+                        continue
+                    # ----------------------------------------------------------
+                    
                     title = entry.get('title')
                     
                     live_status = entry.get('live_status')
@@ -153,7 +162,7 @@ def fetch_and_update():
                     print(f"Successfully added/updated: {title}")
                     
             except Exception as e:
-                print(f"Error fetching {channel_url}: {e}")
+                print(f"Error fetching {video_tab_url}: {e}")
 
 if __name__ == "__main__":
     fetch_and_update()
