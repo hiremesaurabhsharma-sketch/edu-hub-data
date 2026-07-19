@@ -1,19 +1,15 @@
-import os
 import yt_dlp
 from supabase import create_client, Client
 
-# सीक्रेट्स को चेक करें कि वे खाली तो नहीं हैं
-url = os.environ.get("SUPABASE_URL")
-key = os.environ.get("SUPABASE_KEY")
-
-if not url or not key:
-    raise ValueError("SUPABASE_URL or SUPABASE_KEY not found in environment variables!")
+# हमने Secrets का झंझट खत्म कर दिया और सीधा URL/Key यहाँ डाल दिया
+url: str = "https://sysxryxguqjjwqdydmkd.supabase.co"
+key: str = "sb_publishable_zJsY2l-NP38i15X8QymP7A_J2kUzbbb"
 
 supabase: Client = create_client(url, key)
 
-# 2. अपने टीचर्स/चैनल्स के लिंक यहाँ डालें
+# अपने टीचर्स/चैनल्स के लिंक यहाँ डालें
 CHANNEL_URLS = [
-    "https://www.youtube.com/@veritasium",  # इसे अपने चैनल लिंक से बदलें
+    "https://www.youtube.com/@veritasium",  
     "https://www.youtube.com/@PhysicsWallah"
 ]
 
