@@ -138,15 +138,18 @@ def fetch_and_update():
                 for entry in entries:
                     video_id = entry.get('id')
                     
-                    # --- नया फ़िल्टर: चैनल ID (UC...) और गलत ID को ब्लॉक करना ---
+                    # --- फ़िल्टर: चैनल ID (UC...) और गलत ID को ब्लॉक करना ---
                     if not video_id or video_id.startswith('UC') or len(video_id) != 11:
                         continue
-                    # ----------------------------------------------------------
                     
                     title = entry.get('title')
                     
                     live_status = entry.get('live_status')
                     is_live = True if live_status == 'is_live' else False
+                    
+                    # --- नया बदलाव: डिस्क्रिप्शन और डेट निकालना ---
+                    description = entry.get('description') or ""
+                    upload_date = entry.get('upload_date') or ""
                     
                     thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
                     
@@ -155,7 +158,9 @@ def fetch_and_update():
                         "title": title,
                         "channel_id": channel_name, 
                         "thumbnail_url": thumbnail_url,
-                        "is_live": is_live
+                        "is_live": is_live,
+                        "description": description,    # <--- नया कॉलम डेटा
+                        "published_at": upload_date    # <--- नया कॉलम डेटा
                     }
                     
                     supabase.table('videos').upsert(video_data, on_conflict='youtube_video_id').execute()
