@@ -1,35 +1,28 @@
-name: Hourly Video Updater
+name: Auto-Update Supabase Database
 
 on:
   schedule:
-    - cron: '0 * * * *' # यह लाइन इसे हर 1 घंटे में चलाएगी
-  workflow_dispatch: # यह हमें इसे मैन्युअली (बटन दबाकर) टेस्ट करने की सुविधा देगा
-
-permissions:
-  contents: write # यह GitHub को आपकी फाइल (videos.json) सेव करने की परमिशन देता है
+    - cron: '*/15 * * * *'  # यह हर 15 मिनट में रन होगा
+  workflow_dispatch:        # यह बटन आपको इसे मैन्युअली रन करने की सुविधा देगा
 
 jobs:
-  run-python-script:
+  update-database:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install tools
-        run: pip install -r requirements.txt
-
-      - name: Run Python script
-        run: python fetch_videos.py
-
-      - name: Save new videos to GitHub
+      - name: Install Dependencies
         run: |
-          git config --global user.name "GitHub Action Bot"
-          git config --global user.email "action@github.com"
-          git add videos.json
-          git commit -m "Auto-updated videos.json" || exit 0
-          git push
+          pip install yt-dlp supabase
+
+      - name: Run Fetch Script and Push to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python fetch_videos.py  # अगर आपकी फाइल का नाम कुछ और है, तो इसे बदल लें
