@@ -1,22 +1,126 @@
 import yt_dlp
 from supabase import create_client, Client
 
-# हमने Secrets का झंझट खत्म कर दिया और सीधा URL/Key यहाँ डाल दिया
+# Supabase Credentials
 url: str = "https://sysxryxguqjjwqdydmkd.supabase.co"
 key: str = "sb_publishable_zJsY2l-NP38i15X8QymP7A_J2kUzbbb"
-
 supabase: Client = create_client(url, key)
 
-# अपने टीचर्स/चैनल्स के लिंक यहाँ डालें
+# आपके सभी चैनल्स की लिस्ट
 CHANNEL_URLS = [
-    "https://www.youtube.com/@veritasium",  
-    "https://www.youtube.com/@PhysicsWallah"
+    # --- UPSC / IAS ---
+    "https://www.youtube.com/@PWOnlyIAS",
+    "https://www.youtube.com/@SleepyClasses",
+    "https://www.youtube.com/@insightsiasofficial",
+    "https://www.youtube.com/@BYJUSIAS",
+    "https://www.youtube.com/@ForumIASOfficial",
+    "https://www.youtube.com/@iasbaba-official",
+    "https://www.youtube.com/@StudyIQIASHindi",
+    "https://www.youtube.com/@CivilsDailyIAS",
+    "https://www.youtube.com/@UnacademyUPSCCSE",
+    "https://www.youtube.com/@ChahalAcademy",
+    "https://www.youtube.com/@MalukaIAS",
+    "https://www.youtube.com/@KSGIndia",
+    "https://www.youtube.com/@ShankarIASAcademy",
+    "https://www.youtube.com/@EliteIAS",
+    "https://www.youtube.com/@VajiramandRaviOfficial",
+    "https://www.youtube.com/@KhanGlobalStudies",
+    "https://www.youtube.com/@LukmaanIAS",
+    "https://www.youtube.com/@Edukemy",
+    "https://www.youtube.com/@AnalystIAS",
+    "https://www.youtube.com/@TathastuICS",
+    "https://www.youtube.com/@ALSIASOfficial",
+    "https://www.youtube.com/@ChronicleIAS",
+    "https://www.youtube.com/@GSSCOREofficial",
+    "https://www.youtube.com/@DhyeyaIASHindi",
+    "https://www.youtube.com/@SriramsIAS",
+
+    # --- SSC / CGL / Govt Exams ---
+    "https://www.youtube.com/@RojgarwithAnkit",
+    "https://www.youtube.com/@KDLIVE",
+    "https://www.youtube.com/@wifistudy",
+    "https://www.youtube.com/@SSCMaker",
+    "https://www.youtube.com/@RamoMaths",
+    "https://www.youtube.com/@ssccglpinnacle",
+    "https://www.youtube.com/@TestbookSSC",
+    "https://www.youtube.com/@MDClasses",
+    "https://www.youtube.com/@EnglishWithJaideepSir",
+    "https://www.youtube.com/@LearnWithAmanAndBarkha",
+    "https://www.youtube.com/@ReasoningByPiyushVarshney",
+    "https://www.youtube.com/@MathsBySahilSir",
+    "https://www.youtube.com/@NEONCLASSES",
+    "https://www.youtube.com/@e1coachingcenter",
+    "https://www.youtube.com/@MathsByArunSir",
+    "https://www.youtube.com/@SSCAdda247",
+    "https://www.youtube.com/@SSCExampur",
+    "https://www.youtube.com/@SuperSuperSSC",
+    "https://www.youtube.com/@GaganPratapTalks",
+    "https://www.youtube.com/@EnglishWithGopalVerma",
+    "https://www.youtube.com/@ReasoningByDeepakSir",
+    "https://www.youtube.com/@AdityaRanjanTalks",
+    "https://www.youtube.com/@CareerwillExams",
+    "https://www.youtube.com/@SChandAcademy",
+    "https://www.youtube.com/@TopersPrimeSSC",
+
+    # --- JEE Main & Advanced ---
+    "https://www.youtube.com/@JEEWallah",
+    "https://www.youtube.com/@MotionIITJEE",
+    "https://www.youtube.com/@UnacademyAtoms",
+    "https://www.youtube.com/@ApniKakshaJEE",
+    "https://www.youtube.com/@ATPSTARJEE",
+    "https://www.youtube.com/@EtoosEducation",
+    "https://www.youtube.com/@ALLENJEE",
+    "https://www.youtube.com/@VedantuJEEEnglish",
+    "https://www.youtube.com/@SriChaitanyaEducationalInstitutions",
+    "https://www.youtube.com/@IITianExplains",
+    "https://www.youtube.com/@VineetLoomba",
+    "https://www.youtube.com/@namokaul",
+    "https://www.youtube.com/@sachinsirphysics",
+    "https://www.youtube.com/@arvindkalia",
+    "https://www.youtube.com/@DexterChem",
+    "https://www.youtube.com/@VoraClasses",
+    "https://www.youtube.com/@PhysicsGalaxyOfficial",
+    "https://www.youtube.com/@UnacademyJEEEnglish",
+    "https://www.youtube.com/@ResonanceEdu",
+    "https://www.youtube.com/@FIITJEEOfficial",
+    "https://www.youtube.com/@NarayanaEducationalInstitutions",
+    "https://www.youtube.com/@CanvasClasses",
+    "https://www.youtube.com/@MKASirIITianExplains",
+    "https://www.youtube.com/@PhysicsbyNKCSir",
+    "https://www.youtube.com/@Mathsmerizing",
+
+    # --- NEET / Medical ---
+    "https://www.youtube.com/@NEETWallahPW",
+    "https://www.youtube.com/@CompetitionWallah",
+    "https://www.youtube.com/@AakashNEET",
+    "https://www.youtube.com/@DrAnandMani",
+    "https://www.youtube.com/@GarimaGoelBiology",
+    "https://www.youtube.com/@SeepPahuja",
+    "https://www.youtube.com/@RituRattewal",
+    "https://www.youtube.com/@BiomentorsClassesOnline",
+    "https://www.youtube.com/@VedantuNEET",
+    "https://www.youtube.com/@OzoneClasses",
+    "https://www.youtube.com/@BeWiseClasses",
+    "https://www.youtube.com/@Physicsaholics",
+    "https://www.youtube.com/@TamannaChaudhary",
+    "https://www.youtube.com/@KVEDUCATION",
+    "https://www.youtube.com/@NeelaBakoreTutorials",
+    "https://www.youtube.com/@UnacademyNEETEnglish",
+    "https://www.youtube.com/@PWEnglishNEET",
+    "https://www.youtube.com/@NEETprep",
+    "https://www.youtube.com/@BiologybyAmritSir",
+    "https://www.youtube.com/@NewLightInstitute",
+    "https://www.youtube.com/@CommandOnBiology",
+    "https://www.youtube.com/@SinghSirChemistry",
+    "https://www.youtube.com/@DrSKSingh",
+    "https://www.youtube.com/@ShipraMishra",
+    "https://www.youtube.com/@GoalNEET"
 ]
 
 def fetch_and_update():
     ydl_opts = {
         'extract_flat': True,
-        'playlist_items': '1-10', 
+        'playlist_items': '1-10', # हर चैनल की ताज़ा 10 वीडियोस लाएगा 
         'quiet': True
     }
     
