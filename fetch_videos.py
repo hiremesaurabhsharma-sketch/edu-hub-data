@@ -2,13 +2,13 @@ import json
 import os
 import yt_dlp
 
-# 1. आपके टॉप 5 एजुकेशनल चैनल्स की लिस्ट
+# 1. आपके टॉप 5 एजुकेशनल चैनल्स की लिस्ट (अपडेटेड)
 CHANNEL_URLS = [
-    "https://www.youtube.com/@PhysicsWallah",
-    "https://www.youtube.com/@khanacademy",
-    "https://www.youtube.com/@TEDEd",
-    "https://www.youtube.com/@crashcourse",
-    "https://www.youtube.com/@veritasium"
+    "https://www.youtube.com/@PhysicsWallah/videos",
+    "https://www.youtube.com/@khanacademy/videos",
+    "https://www.youtube.com/@TEDEd/videos",
+    "https://www.youtube.com/@crashcourse/videos",
+    "https://www.youtube.com/@veritasium/videos"
 ]
 
 JSON_FILENAME = "videos.json"
