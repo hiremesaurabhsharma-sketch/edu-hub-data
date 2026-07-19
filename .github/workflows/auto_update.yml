@@ -1,8 +1,8 @@
 name: Auto-Update Supabase Database
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'
+  repository_dispatch:
+    types: [run-python-script]
   workflow_dispatch:
 
 jobs:
