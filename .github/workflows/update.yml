@@ -1,0 +1,35 @@
+name: Hourly Video Updater
+
+on:
+  schedule:
+    - cron: '0 * * * *' # यह लाइन इसे हर 1 घंटे में चलाएगी
+  workflow_dispatch: # यह हमें इसे मैन्युअली (बटन दबाकर) टेस्ट करने की सुविधा देगा
+
+permissions:
+  contents: write # यह GitHub को आपकी फाइल (videos.json) सेव करने की परमिशन देता है
+
+jobs:
+  run-python-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install tools
+        run: pip install -r requirements.txt
+
+      - name: Run Python script
+        run: python fetch_videos.py
+
+      - name: Save new videos to GitHub
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          git add videos.json
+          git commit -m "Auto-updated videos.json" || exit 0
+          git push
