@@ -1,94 +1,60 @@
-import json
 import os
 import yt_dlp
+from supabase import create_client, Client
 
-# 1. आपके टॉप 5 एजुकेशनल चैनल्स की लिस्ट (अपडेटेड)
+# 1. GitHub Secrets से Supabase का कनेक्शन
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
+
+# 2. अपने टीचर्स/चैनल्स के लिंक यहाँ डालें
 CHANNEL_URLS = [
-    "https://www.youtube.com/@PhysicsWallah/videos",
-    "https://www.youtube.com/@khanacademy/videos",
-    "https://www.youtube.com/@TEDEd/videos",
-    "https://www.youtube.com/@crashcourse/videos",
-    "https://www.youtube.com/@veritasium/videos"
+    "https://www.youtube.com/@veritasium",  # इसे अपने चैनल लिंक से बदलें
+    "https://www.youtube.com/@PhysicsWallah"
 ]
 
-JSON_FILENAME = "videos.json"
-MAX_VIDEOS = 2000
-
-def fetch_channel_videos():
-    # yt-dlp की सेटिंग (ताकि यह तेजी से काम करे और सिर्फ डेटा लाए)
+def fetch_and_update():
+    # yt-dlp की सेटिंग्स (हम सिर्फ लेटेस्ट 10 वीडियो ला रहे हैं ताकि फास्ट रहे)
     ydl_opts = {
-        'extract_flat': 'in_playlist',
-        'playlist_items': '1-15', # हम 15 वीडियो चेक करेंगे ताकि Shorts हटने के बाद 5 मिल जाएं
-        'quiet': True,
+        'extract_flat': True,
+        'playlist_items': '1-10', 
+        'quiet': True
     }
-
-    new_videos = []
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        for url in CHANNEL_URLS:
+        for channel_url in CHANNEL_URLS:
             try:
-                print(f"Fetching data for: {url}")
-                info = ydl.extract_info(url, download=False)
-                channel_name = info.get('uploader') or info.get('title') or "Unknown Channel"
+                print(f"Fetching data for: {channel_url}")
+                info = ydl.extract_info(channel_url, download=False)
+                channel_name = info.get('title', 'Unknown Channel')
+                channel_id = info.get('id', 'unknown')
                 
                 entries = info.get('entries', [])
-                valid_videos_found = 0
-                
                 for entry in entries:
-                    if valid_videos_found >= 5:
-                        break # जैसे ही 5 सही वीडियो मिल जाएं, रुक जाओ
-                        
-                    duration = entry.get('duration')
+                    video_id = entry.get('id')
+                    title = entry.get('title')
                     
-                    # 3 मिनट (180 सेकंड) से छोटे वीडियो (यानी Shorts) को इग्नोर करें
-                    if duration and duration >= 180:
-                        video_data = {
-                            "title": entry.get('title'),
-                            "video_id": entry.get('id'),
-                            "thumbnail_url": f"https://i.ytimg.com/vi/{entry.get('id')}/hqdefault.jpg",
-                            "channel_name": channel_name
-                        }
-                        new_videos.append(video_data)
-                        valid_videos_found += 1
-                        
+                    # चेक करें कि क्या वीडियो अभी 'LIVE' है
+                    live_status = entry.get('live_status')
+                    is_live = True if live_status == 'is_live' else False
+                    
+                    thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+                    
+                    # Supabase में भेजने के लिए डेटा तैयार करना
+                    video_data = {
+                        "youtube_video_id": video_id,
+                        "title": title,
+                        "channel_id": channel_name, 
+                        "thumbnail_url": thumbnail_url,
+                        "is_live": is_live
+                    }
+                    
+                    # डेटाबेस में सेव करना (अगर पहले से है तो अपडेट करेगा)
+                    supabase.table('videos').upsert(video_data, on_conflict='youtube_video_id').execute()
+                    print(f"Successfully added/updated: {title}")
+                    
             except Exception as e:
-                print(f"Error fetching {url}: {e}")
-
-    return new_videos
-
-def update_json(new_videos):
-    existing_videos = []
-    
-    # पुरानी फाइल पढ़ें (अगर मौजूद है)
-    if os.path.exists(JSON_FILENAME):
-        try:
-            with open(JSON_FILENAME, 'r', encoding='utf-8') as f:
-                existing_videos = json.load(f)
-        except json.JSONDecodeError:
-            existing_videos = []
-
-    # डुप्लीकेट चेक करने के लिए मौजूदा video_id की लिस्ट बनाएं
-    existing_ids = {vid['video_id'] for vid in existing_videos}
-    
-    # नए वीडियो जोड़ें (नए वीडियो सबसे ऊपर आएंगे)
-    added_count = 0
-    for vid in new_videos:
-        if vid['video_id'] not in existing_ids:
-            existing_videos.insert(0, vid)
-            added_count += 1
-
-    # 2000 वीडियो की लिमिट (ताकि वेबसाइट कभी स्लो न हो)
-    if len(existing_videos) > MAX_VIDEOS:
-        existing_videos = existing_videos[:MAX_VIDEOS]
-
-    # फाइल को वापस सुरक्षित रूप से सेव करें
-    with open(JSON_FILENAME, 'w', encoding='utf-8') as f:
-        json.dump(existing_videos, f, ensure_ascii=False, indent=4)
-        
-    print(f"Successfully added {added_count} new videos. Total videos in database: {len(existing_videos)}")
+                print(f"Error fetching {channel_url}: {e}")
 
 if __name__ == "__main__":
-    print("Starting video fetch process...")
-    videos = fetch_channel_videos()
-    update_json(videos)
-    print("Process completed!")
+    fetch_and_update()
